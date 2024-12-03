@@ -16,7 +16,7 @@ let data = {
 // Daten vom Server laden
 async function loadData() {
     try {
-        const response = await fetch('http://localhost:3000/api/data');
+        const response = await fetch('https://v-m-259c.onrender.com/api/data');
         const serverData = await response.json();
         if (Object.keys(serverData).length > 0) {
             data = serverData;
@@ -72,7 +72,7 @@ function logout() {
 
 async function saveData() {
     try {
-        await fetch('http://localhost:3000/api/data', {
+        await fetch('https://v-m-259c.onrender.com/api/data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
