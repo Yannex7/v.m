@@ -18,12 +18,24 @@ async function loadData() {
     try {
         const response = await fetch('https://v-m-259c.onrender.com/api/data');
         const serverData = await response.json();
-        if (Object.keys(serverData).length > 0) {
-            data = serverData;
-        }
+        // Sicherstellen dass die Datenstruktur existiert
+        data = {
+            stock: serverData.stock || { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            sales: serverData.sales || { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            consumed: serverData.consumed || { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            payments: serverData.payments || { robin: 0, robink: 0, adrian: 0, andreas: 0 }
+        };
         updateDisplay();
     } catch (error) {
         console.error('Fehler beim Laden:', error);
+        // Fallback auf Standarddaten bei Fehler
+        data = {
+            stock: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            sales: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            consumed: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
+            payments: { robin: 0, robink: 0, adrian: 0, andreas: 0 }
+        };
+        updateDisplay();
     }
 }
 
