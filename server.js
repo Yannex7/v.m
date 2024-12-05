@@ -7,17 +7,15 @@ app.use(cors());
 app.use(express.json());
 
 const uri = "mongodb+srv://yannismartinils:D5HMpNx1wVCZyfme@vape-db.y7lnc.mongodb.net/?retryWrites=true&w=majority&appName=vape-db";
-const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+const client = new MongoClient(uri);
 
 const defaultData = {
     stock: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
     sales: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
     consumed: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
     payments: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
-    totalQuantity: 0
+    totalQuantity: 0,
+    logs: []
 };
 
 let dbConnection;
@@ -43,7 +41,7 @@ app.get('/api/data', async (req, res) => {
         res.json(data);
     } catch (error) {
         console.error('Database error:', error);
-        res.json(defaultData);
+        res.status(500).json({ error: error.message });
     }
 });
 
