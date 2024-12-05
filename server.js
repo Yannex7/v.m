@@ -13,10 +13,11 @@ const client = new MongoClient(uri, {
 });
 
 const defaultData = {
-    stock: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
-    sales: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
-    consumed: { robin: 0, robink: 0, adrian: 0, andreas: 0 },
-    payments: { robin: 0, robink: 0, adrian: 0, andreas: 0 }
+    stock: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
+    sales: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
+    consumed: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
+    payments: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
+    totalQuantity: 0
 };
 
 let dbConnection;
