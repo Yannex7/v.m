@@ -9,15 +9,27 @@ app.use(express.json());
 const uri = "mongodb+srv://yannismartinils:D5HMpNx1wVCZyfme@vape-db.y7lnc.mongodb.net/?retryWrites=true&w=majority&appName=vape-db";
 const client = new MongoClient(uri);
 
+// MongoDB-Verbindung beim Start
+async function connectToMongoDB() {
+    try {
+        await client.connect();
+        console.log('MongoDB verbunden');
+    } catch (error) {
+        console.error('MongoDB Verbindungsfehler:', error);
+    }
+}
+
+connectToMongoDB();
+
 // Alle Bestellungen abrufen
 app.get('/api/orders', async (req, res) => {
     try {
-        await client.connect();
         const database = client.db('inventar-db');
         const collection = database.collection('orders');
         const orders = await collection.find({}).toArray();
         res.json(orders);
     } catch (error) {
+        console.error('GET /api/orders Fehler:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -25,13 +37,13 @@ app.get('/api/orders', async (req, res) => {
 // Neue Bestellung erstellen
 app.post('/api/orders', async (req, res) => {
     try {
-        await client.connect();
         const database = client.db('inventar-db');
         const collection = database.collection('orders');
         const result = await collection.insertOne(req.body);
         const createdOrder = await collection.findOne({ _id: result.insertedId });
         res.json(createdOrder);
     } catch (error) {
+        console.error('POST /api/orders Fehler:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -39,7 +51,6 @@ app.post('/api/orders', async (req, res) => {
 // Bestellung aktualisieren
 app.put('/api/orders/:id', async (req, res) => {
     try {
-        await client.connect();
         const database = client.db('inventar-db');
         const collection = database.collection('orders');
         await collection.updateOne(
@@ -49,6 +60,7 @@ app.put('/api/orders/:id', async (req, res) => {
         const updatedOrder = await collection.findOne({ _id: new ObjectId(req.params.id) });
         res.json(updatedOrder);
     } catch (error) {
+        console.error('PUT /api/orders Fehler:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -56,12 +68,12 @@ app.put('/api/orders/:id', async (req, res) => {
 // Einzelne Bestellung löschen
 app.delete('/api/orders/:id', async (req, res) => {
     try {
-        await client.connect();
         const database = client.db('inventar-db');
         const collection = database.collection('orders');
         await collection.deleteOne({ _id: new ObjectId(req.params.id) });
         res.json({ message: 'Bestellung gelöscht' });
     } catch (error) {
+        console.error('DELETE /api/orders Fehler:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -69,12 +81,12 @@ app.delete('/api/orders/:id', async (req, res) => {
 // Alle Daten löschen
 app.delete('/api/orders/reset-all', async (req, res) => {
     try {
-        await client.connect();
         const database = client.db('inventar-db');
         const collection = database.collection('orders');
         await collection.deleteMany({});
         res.json({ message: 'Alle Daten gelöscht' });
     } catch (error) {
+        console.error('DELETE /api/orders/reset-all Fehler:', error);
         res.status(500).json({ error: error.message });
     }
 });
