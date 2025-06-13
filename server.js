@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 
 const app = express();
@@ -9,54 +9,77 @@ app.use(express.json());
 const uri = "mongodb+srv://yannismartinils:D5HMpNx1wVCZyfme@vape-db.y7lnc.mongodb.net/?retryWrites=true&w=majority&appName=vape-db";
 const client = new MongoClient(uri);
 
-const defaultData = {
-    stock: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
-    sales: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
-    consumed: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
-    payments: { robin: 0, robink: 0, adrian: 0, andreas: 0, martin: 0 },
-    totalQuantity: 0,
-    logs: []
-};
-
-let dbConnection;
-
-async function connectDB() {
-    if (!dbConnection) {
+// Alle Bestellungen abrufen
+app.get('/api/orders', async (req, res) => {
+    try {
         await client.connect();
-        dbConnection = client.db('vape-db');
-        console.log('Connected to MongoDB');
-    }
-    return dbConnection;
-}
-
-app.get('/api/data', async (req, res) => {
-    try {
-        const db = await connectDB();
-        const collection = db.collection('vape-data');
-        let data = await collection.findOne({});
-        if (!data) {
-            await collection.insertOne(defaultData);
-            data = defaultData;
-        }
-        res.json(data);
+        const database = client.db('inventar-db');
+        const collection = database.collection('orders');
+        const orders = await collection.find({}).toArray();
+        res.json(orders);
     } catch (error) {
-        console.error('Database error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.post('/api/data', async (req, res) => {
+// Neue Bestellung erstellen
+app.post('/api/orders', async (req, res) => {
     try {
-        const db = await connectDB();
-        const collection = db.collection('vape-data');
-        await collection.updateOne({}, { $set: req.body }, { upsert: true });
-        res.json({ success: true });
+        await client.connect();
+        const database = client.db('inventar-db');
+        const collection = database.collection('orders');
+        const result = await collection.insertOne(req.body);
+        const createdOrder = await collection.findOne({ _id: result.insertedId });
+        res.json(createdOrder);
     } catch (error) {
-        console.error('Save error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server läuft auf Port 3000');
+// Bestellung aktualisieren
+app.put('/api/orders/:id', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db('inventar-db');
+        const collection = database.collection('orders');
+        await collection.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $set: req.body }
+        );
+        const updatedOrder = await collection.findOne({ _id: new ObjectId(req.params.id) });
+        res.json(updatedOrder);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Einzelne Bestellung löschen
+app.delete('/api/orders/:id', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db('inventar-db');
+        const collection = database.collection('orders');
+        await collection.deleteOne({ _id: new ObjectId(req.params.id) });
+        res.json({ message: 'Bestellung gelöscht' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Alle Daten löschen
+app.delete('/api/orders/reset-all', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db('inventar-db');
+        const collection = database.collection('orders');
+        await collection.deleteMany({});
+        res.json({ message: 'Alle Daten gelöscht' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server läuft auf Port ${PORT}`);
 });
